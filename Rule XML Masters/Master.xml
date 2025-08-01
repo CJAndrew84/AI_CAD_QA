@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<qa_settings>
+  
+  <checker target="drawing">
+
+<rule type="mandatory" id="_init">
+      <name>VBA2</name>
+      <options>
+        <documentation />
+        <vb_project_name>CADCheckLibrary</vb_project_name>
+        <vb_module_name>Checks</vb_module_name>
+        <vb_function_name>CheckScript</vb_function_name>
+        <vb_metadata>master</vb_metadata>
+        <vb_parameters>
+          <version name='Master.xml'>v0.10 (12-03-2019)</version>
+        </vb_parameters>
+      </options>
+    </rule>
+    
+<rule type="mandatory" id="Shared Lists">
+      <reference>SharedLists.xml</reference>
+    </rule>
+
+<rule type="mandatory" id="Shared Reference Checks">
+      <reference>ReferencesShared.xml</reference>
+    </rule>
+
+<rule type="advisory" id="Level Checks">
+      <reference>RegExLevelCheck.xml</reference>
+    </rule>
+    
+<rule type="advisory" id="Reference Nest Depth Check">
+      <reference>ReferenceNestDepthChecks.xml</reference>
+    </rule>
+    
+<rule type="advisory" id="Attribute Checks">
+      <reference>AttributeChecks.xml</reference>
+    </rule>
+
+<rule type="advisory" id="Reference is from PW Checks">
+      <reference>ReferenceIsfromPW.xml</reference>
+    </rule>
+
+<rule type="advisory" id="Model Content Checks">
+      <reference>ModelContentCheck.xml</reference>
+    </rule>
+
+    <rule type="advisory" id="Reference Display Checks">
+      <reference>ReferenceDisplayCheck.xml</reference>
+    </rule>
+
+<rule type="advisory" id="TitleBlock Tag Checks">
+      <reference>TBTagsCheck.xml</reference>
+    </rule>
+
+<rule type="advisory" id="Working Unit Checks">
+      <reference>OriginUnitsChecks.xml</reference>
+    </rule>
+
+<rule type="advisory" id="Coordinate System Checks">
+      <reference>ModelGCSCheck.xml</reference>
+    </rule>
+
+<rule type="advisory" id="Drawing Content Checks">
+      <reference>DrawingContentCheck.xml</reference>
+    </rule>
+
+<rule type="advisory" id="Sheet Model Count Check">
+      <reference>SheetModelCountCheck.xml</reference>
+    </rule>
+
+<rule type="advisory" id="Text Style Checks">
+      <reference>TextStyleCheck.xml</reference>
+    </rule>
+
+<rule type="advisory" id="Dimension Style Checks">
+      <reference>DimensionCheck.xml</reference>
+    </rule>
+
+
+
+
+  </checker>
+</qa_settings>

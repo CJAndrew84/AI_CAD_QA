@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rule>
+  <name>VBA2</name>
+  <options>
+    <documentation>
+        Checks for correct Text Styles in Text Elements
+    </documentation>
+
+    <vb_project_name>CADCheckLibrary</vb_project_name>
+    <vb_module_name>Checks</vb_module_name>
+    <vb_function_name>CheckScript</vb_function_name>
+    <vb_metadata>none</vb_metadata>
+    <vb_parameters>
+      <msg_limits group="txSt">
+        <soft limit="30">Found {1} incorrect Text Style occurences. First {2} were reported.</soft>
+        <!-- hard limit is optional! -->
+        <hard limit ="1000">Check terminated after {1} errors.</hard>
+      </msg_limits>
+
+      <list name="Allowed TextStyles">
+        <select what="text_styles">
+          <files group="no" open_direct="yes">
+            <file>Text Favorites_Text Styles_Dimension Styles UK.dgnlib</file>
+            <where />
+          </files>
+          <item>$text_style.name$</item>
+        </select>
+      </list>
+
+      <verify>
+        <select what="elements" >
+          <models />
+          <recurse_elements />                 
+          <include_type>Text</include_type>
+          <where />
+        </select>
+        
+        <!-- Text elements -->
+        <if>
+          <where>
+            <test l="$type$" op="=" r="Text" />
+            <not>
+              <in key="$text/text_style.name$" listref="Allowed TextStyles" />
+            </not>
+          </where>
+          <msg id="true" level="error" group="txSt">Error: Text element ($model.name$:$id$) uses text style '$text/text_style.name$'.</msg>
+          <msg id="false" />
+        </if>
+
+        <!-- Global verifier messages -->
+        <msg id="pass">All text styles used in graphical elements are named correctly. Passed.</msg>
+        <msg id="fail" />
+      </verify>
+
+      <msg id="skip">Checking Skipped as not a valid file for checking based on Document Type</msg>
+      <msg id="pass">No errors found. Check passed.</msg>
+    </vb_parameters>
+  </options>
+</rule>
+
+
+
+
+

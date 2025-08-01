@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rule>
+  <name>VBA2</name>
+  <options>
+    <documentation>
+      Drawing only Check
+      Checks all references have display set to on for a DGN or loaded for a DWG
+    </documentation>
+    <vb_project_name>CADCheckLibrary</vb_project_name>
+    <vb_module_name>Checks</vb_module_name>
+    <vb_function_name>CheckScript</vb_function_name>
+    <vb_metadata>none</vb_metadata>
+    <vb_parameters>
+
+      <msg_limits group="ref">
+        <soft limit="50">Found {1} reference errors. First {2} errors were reported.</soft>
+        <hard limit ="1000">Check terminated after {1} errors.</hard>
+      </msg_limits>       
+      
+      <verify>
+        <when>
+          <test l="drawing" op="="><r><list_value key="type" listref="FileType"/></r></test>
+        </when>
+        <select what="references" />
+                    
+        <if>
+          <where>
+            <test l="$is_displayed$" op="=" r="True" />
+          </where>
+
+          <msg id="false">
+            Error: Reference '$name$' ($file_name$) in model '$model.name$' must be displayed.
+          </msg>
+        </if>
+
+      </verify>
+      <msg id="pass">No errors found. Check passed.</msg>
+    </vb_parameters>
+  </options>
+</rule>

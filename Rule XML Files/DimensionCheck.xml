@@ -1,0 +1,59 @@
+<rule type="advisory" id="Standrd Dim Styles Check">
+  <name>VBA2</name>
+  <options>
+    <documentation>Checks Dimension Style names against names defined in one or more DGNLibs</documentation>
+    <vb_project_name>CADCheckLibrary</vb_project_name>
+    <vb_module_name>Checks</vb_module_name>
+    <vb_function_name>CheckScript</vb_function_name>
+    <vb_metadata>none</vb_metadata>
+    <vb_parameters>
+
+      <msg_limits group="dimSt">
+        <soft limit="30">Found {1} incorrect Dimension Style occurences. First {2} were reported.</soft>
+        <!-- hard limit is optional! -->
+        <hard limit ="1000">Check terminated after {1} errors.</hard>
+      </msg_limits>
+
+      <list name="Allowed DimStyles" >
+        <select what="dimension_styles">
+          <files group="no" open_direct="no">
+            <file>Text Favorites_Text Styles_Dimension Styles UK.dgnlib</file>
+            <where />
+          </files>
+          <item>$dim_style.name$</item>
+        </select>
+      </list>
+            
+      <verify>
+        <select what="elements" >
+          <models />
+          <recurse_elements />
+          <!-- element types that have Dimension style -->
+          <include_type>Dimension</include_type>
+          <where />
+        </select>
+
+        <if>
+          <where>
+            <test l="$type$" op="=" r="Dimension" />
+            <not>
+              <in key="$dim/dim_style.name$" listref="Allowed DimStyles" />
+            </not>
+          </where>
+          <msg id="true" level="error" group="dimSt">Error: Dimension element ($model.name$:$id$) uses Dimension style '$dim/dim_style.name$'.</msg>
+          <msg id="false" />
+        </if>
+
+        <!-- Global verifier messages -->
+        <msg id="pass">All dimension styles used in graphical elements are named correctly. Passed.</msg>
+        <msg id="fail" />
+
+      </verify>
+      <msg id="pass">No errors found. Check passed.</msg>
+
+    </vb_parameters>
+  </options>
+</rule>
+
+
+         

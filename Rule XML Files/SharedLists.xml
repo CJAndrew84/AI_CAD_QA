@@ -1,0 +1,148 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<rule>
+  <name>VBA2</name>
+  <options>
+    <documentation>
+      <ul>
+        <li>Discover Document Type through PW attribute. Store for later use in other Rules </li>
+      </ul>
+    </documentation>
+    <vb_project_name>CADCheckLibrary</vb_project_name>
+    <vb_module_name>Checks</vb_module_name>
+    <vb_function_name>CheckScript</vb_function_name>
+    <vb_metadata>master</vb_metadata>
+    <vb_parameters>
+
+      <list name="FileType" shared="true" />
+      <list name="FileFormat" shared="true"  />
+      <list name="SharedRef" shared="true"  />
+            
+      <verify>
+        <select what="file" >
+          <where />
+        </select>
+        <!-- Type Codes for Drawings -->
+        <if>
+          <where> 
+            <or>
+              <test l="$EDIT#DC_TYPE_CODE$" op="like" r="DR*" />         
+            </or>
+          </where>
+          <modify_list l="FileType" op="add">
+            <pair>
+              <key>type</key>
+              <value>drawing</value>
+            </pair>
+          </modify_list>
+
+        <!-- Type Codes for Models -->
+        <else_if>
+          <where>
+            <or>
+              <test l="$EDIT#DC_TYPE_CODE$" op="like" r="M2*" />
+              <test l="$EDIT#DC_TYPE_CODE$" op="like" r="M3*" />
+              <test l="$EDIT#DC_TYPE_CODE$" op="like" r="MX*" />
+              <test l="$EDIT#DC_TYPE_CODE$" op="like" r="MP*" />
+            </or>
+          </where>
+          <modify_list l="FileType" op="add">
+            <pair>
+              <key>type</key>
+              <value>model</value>
+            </pair>
+          </modify_list>
+          
+        <!-- Type Codes for Composite Models -->
+        <else_if>
+          <where>
+            <or>
+              <test l="$EDIT#DC_TYPE_CODE$" op="like" r="CM*" />
+              <test l="$EDIT#DC_TYPE_CODE$" op="like" r="MM*" />
+                          
+            </or>
+          </where>
+          <modify_list l="FileType" op="add">
+            <pair>
+              <key>type</key>
+              <value>compmodel</value>
+            </pair>
+          </modify_list>
+        <!-- </else_if>  ### moved this further down ### -->
+        <else_if>
+          <msg id="true">Warning: Unexpected document type '$EDIT#DC_TYPE_CODE$'. The checks are configured to work with specific Document Types only.</msg>
+        </else_if>
+        </else_if>
+        </else_if>
+        </if>
+
+        <if>
+          <where>
+            <test l="$file_format$" op="=" r="dgn8" />
+          </where>
+          <modify_list l="FileFormat" op="add">
+            <pair>
+               <key>type</key>
+              <value>dgn</value>
+            </pair>
+          </modify_list>
+          <else_if>
+            <where>
+              <test l="$file_format$" op="=" r="dwg" />
+            </where>
+            <modify_list l="FileFormat" op="add">
+              <pair>
+                <key>type</key>
+                <value>dwg</value>
+              </pair>
+            </modify_list>
+            <else_if>
+              <where>
+                <test l="$file_format$" op="=" r="dxf" />
+              </where>
+              <modify_list l="FileFormat" op="add">
+                <pair>
+                  <key>type</key>
+                  <value>dxf</value>
+                </pair>
+              </modify_list>
+              <else_if>
+                <where>
+                  <test l="$file_format$" op="=" r="dgn7" />
+                </where>
+                <modify_list l="FileFormat" op="add">
+                  <pair>
+                    <key>type</key>
+                    <value>dgn</value>
+                  </pair>
+                </modify_list>
+                <else_if>
+                  <msg id="true">Warning: Unexpected file format. The checks are configured to work with dgn,dwg and dxf only.</msg>
+                </else_if>
+              </else_if>
+            </else_if>
+          </else_if>
+        </if> 
+        
+
+
+
+
+        <if>
+          <where>
+            <test l="$EDIT#DC_TYPE_CODE$" op="like" r="DR*" />
+            <test l="$EDIT#DC_TYPE_CODE$" op="like" r="MM*" />
+            <test l="$EDIT#DC_TYPE_CODE$" op="like" r="CM*" />
+
+          </where>
+          <modify_list l="SharedRef" op="add">
+            <pair>
+               <key>type</key>
+              <value>true</value>
+            </pair>
+          </modify_list>
+        </if> 
+      </verify>
+
+    </vb_parameters>
+  </options>
+</rule>

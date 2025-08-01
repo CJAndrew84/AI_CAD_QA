@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rule>
+  <name>VBA2</name>
+  <options>
+    <documentation>
+      Checks DGN Global Origin and Working Unit Settings
+      Checks DWG Design Centre Units set to Metres.
+    </documentation>
+    <vb_project_name>CADCheckLibrary</vb_project_name>
+    <vb_module_name>Checks</vb_module_name>
+    <vb_function_name>CheckScript</vb_function_name>
+    <vb_metadata>none</vb_metadata>
+    <vb_parameters>
+
+      <verify>
+        <when>
+          <and>
+            <test l="dgn" op="="><r><list_value key="type" listref="FileFormat"/></r></test>
+            <or>
+              <test l="model" op="="><r><list_value key="type" listref="FileType"/></r></test>
+              <test l="compmodel" op="="><r><list_value key="type" listref="FileType"/></r></test>
+            </or>
+          </and>
+        </when>
+        <select what="models" />
+       
+        <!-- dgn unit check -->
+        <if>
+          <where>
+            <!-- meters / millimeters -->
+            <test l="$master_units.system$" op="=" r="metric"/>
+            <!-- test unit labels only for V8 files -->
+            <test l="$master_units.label$" op="=" r="m"/>
+          </where>
+
+          <msg id="false">
+            Error: Units in model '$name$' are $master_units.system$ '$master_units.label$'.
+          </msg>
+        </if>
+
+        <!-- dgn UOR check -->
+        <if>
+          <where>
+            <or>
+              <test l="$UORs_per_master_unit$" op="=" r="10000"/>
+            </or>
+          </where>
+          <msg id="false">Error: UOR per master unit in model '$name$' is $UORs_per_master_unit$.</msg>
+        </if>
+      </verify>
+
+      <verify>
+        <when>
+            <test l="dwg" op="="><r><list_value key="type" listref="FileFormat"/></r></test>
+        </when>
+        <select what="models">
+          <models />
+        </select>
+
+        <!-- dwg UOR check -->
+        <if>
+          <where>
+            <test l="$active_desing_file.design_center_units$" op="i=" r="meters" />
+          </where>
+          <msg id="false">Error: The insertion units ($active_desing_file.design_center_units$) do not match the requirement of metres in the ($model.name$) model.</msg>
+        </if>
+
+      </verify>
+    </vb_parameters>
+  </options>
+</rule>

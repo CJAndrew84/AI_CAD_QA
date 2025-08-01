@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--<rule type="Advisory" id="Models Content Check">-->
+<rule>
+  <name>VBA2</name>
+  <options>
+    <documentation>
+      DGN Format Check Only.
+      Checks Geographical Coordinate Sytem assignment     
+    </documentation>
+    <vb_project_name>CADCheckLibrary</vb_project_name>
+    <vb_module_name>Checks</vb_module_name>
+    <vb_function_name>CheckScript</vb_function_name>
+    <vb_metadata>master</vb_metadata>
+    <vb_parameters>
+
+      <verify>
+        <when>
+          <and>
+            <test l="dgn" op="="><r><list_value key="type" listref="FileFormat"/></r></test>
+          <or>
+            <test l="model" op="="><r><list_value key="type" listref="FileType"/></r></test>
+            <test l="compmodel" op="="><r><list_value key="type" listref="FileType"/></r></test>
+          </or>
+          </and>
+        </when>
+        <select what="models">
+          <models>
+            <test l="$model.type$" op="=" r="design" />
+          </models>
+        </select>
+        <if>
+          <where>
+            <test l="$model.GCS.is_specified$" op="i=" r="true" />
+          </where>
+            <if>
+              <where>
+              <test l="$model.GCS.name$" op="!=" r="BritishNatGrid" />
+              </where>
+              <msg id="false" level="info">Model $model.name$ is using a GCS called $model.GCS.name$</msg>
+            </if>
+          <msg id="false">Model is not using a GCS</msg>
+        </if>
+      </verify>
+
+      <msg id="skip">Checking Skipped as not a valid file for checking based on Document Type</msg>
+      
+    </vb_parameters>
+  </options>
+</rule>

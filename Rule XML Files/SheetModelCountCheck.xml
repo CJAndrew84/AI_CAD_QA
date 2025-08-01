@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<rule>
+  <name>VBA2</name>
+  <options>
+    <documentation>
+      Drawing only check.
+      A Drawing should only contain 1 Sheet or Layout model.
+    </documentation>
+    <vb_project_name>CADCheckLibrary</vb_project_name>
+    <vb_module_name>Checks</vb_module_name>
+    <vb_function_name>CheckScript</vb_function_name>
+    <vb_metadata>master</vb_metadata>
+    <vb_parameters>
+
+      <!-- All models must have a Model Sheet model -->
+      <verify>
+        <when>
+          <test l="drawing" op="="><r><list_value key="type" listref="FileType"/></r></test>
+        </when>   
+        <select what="models">
+          <models>
+            <test l="$model.type$" op="=" r="sheet" />
+          </models>
+        </select>
+
+        <count>
+          <where />
+          <range>1</range>
+          <msg id="less">Error: Model does not have a Sheet Model or Layout.</msg>
+          <msg id="more">Error: Model has multiple Sheet Models or Layouts.</msg>
+        </count>
+      </verify>
+      <msg id="pass">No errors found. Layout/sheet check passed.</msg>
+      
+    </vb_parameters>
+  </options>
+</rule>

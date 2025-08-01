@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<rule>
+  <name>VBA2</name>
+  <options>
+    <documentation>
+      Checks that the following attributes contain a value:
+      Project Line 1, Office Line 1.
+      At least one of the Title Line attributes contains a value.
+      None of the Title Line attributes contain the default value of 'TITLE LINE *'
+      Checks that the Filename matches the Document Code.
+    </documentation>
+    <vb_project_name>CADCheckLibrary</vb_project_name>
+    <vb_module_name>Checks</vb_module_name>
+    <vb_function_name>CheckScript</vb_function_name>
+    <vb_metadata>master</vb_metadata>
+    <vb_parameters>
+            
+      <verify>
+        <select what="file" >
+          <where />
+        </select>
+                
+        <!-- Each if statement will check a PW Attribute for a value  Add / Remove as required-->
+        <if>
+          <where>
+            <or>
+              <test l="$EDIT#PW_OFFICE_1$" op="=" r="" />
+            </or>
+          </where>
+          <msg id="true" level="error">Office Line 1 is empty</msg>
+        </if>
+
+        <if>
+          <where>
+            <or>
+              <test l="$EDIT#PW_PROJECT_LINE1$" op="=" r="" />
+            </or>
+          </where>
+          <msg id="true" level="error">Project Line 1 is empty</msg>
+        </if>
+
+        <if>
+          <where>
+            <and>
+              <test l="$EDIT#TB_TITLE_LINE_1$" op="=" r="" />
+              <test l="$EDIT#TB_TITLE_LINE_2$" op="=" r="" />
+              <test l="$EDIT#TB_TITLE_LINE_3$" op="=" r="" />
+              <test l="$EDIT#TB_TITLE_LINE_4$" op="=" r="" />
+            </and>
+          </where>
+          <msg id="true" level="error">All Title Lines are empty</msg>
+        </if>
+
+        <if>
+          <where>
+            <or>
+              <test l="$EDIT#TB_TITLE_LINE_1$" op="like" r="TITLE LINE*" />
+            </or>
+          </where>
+          <msg id="true" level="error">Drawing Title Line 1 contains default value</msg>
+        </if>
+
+        <if>
+          <where>
+            <or>
+              <test l="$EDIT#TB_TITLE_LINE_2$" op="like" r="TITLE LINE*" />
+            </or>
+          </where>
+          <msg id="true" level="error">Drawing Title Line 2 contains default value</msg>
+        </if>
+
+        <if>
+          <where>
+            <or>
+              <test l="$EDIT#TB_TITLE_LINE_3$" op="like" r="TITLE LINE*" />
+            </or>
+          </where>
+          <msg id="true" level="error">Drawing Title Line 3 contains default value</msg>
+        </if>
+
+        <if>
+          <where>
+            <or>
+              <test l="$EDIT#TB_TITLE_LINE_4$" op="like" r="TITLE LINE*" />
+            </or>
+          </where>
+          <msg id="true" level="error">Drawing Title Line 4 contains default value</msg>
+        </if>
+
+        <!--Checks Document FileName against the Value held in the Selected PW Attribute -->        
+         <if>
+          <where>
+            <or>
+              <test op="!=">
+                <l>
+                  <extract p='(.+)\.[^\.]+$' n='1' n2='1'>$design_file.name$</extract>
+                </l>
+                <r>
+                  $EDIT#TB_FILE_ID$
+                </r>
+              </test>
+            </or>
+          </where>
+          <msg id="true" level="error">File Name $design_file.name$ does not match Document Code $EDIT#Doc_code$</msg>
+        </if>
+
+      </verify>
+    </vb_parameters>
+  </options>
+</rule>

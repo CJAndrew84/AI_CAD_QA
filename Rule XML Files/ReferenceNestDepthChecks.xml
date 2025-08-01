@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rule>
+  <name>VBA2</name>
+  <options>
+    <documentation>
+      Checks all reference attachment nest depths.
+      Drawing attachments to have a maximum depth of 2
+      Model attachments to have a maximum depth of 1
+      Master Model attachments to have a maximum depth of 2
+    </documentation>
+    <vb_project_name>CADCheckLibrary</vb_project_name>
+    <vb_module_name>Checks</vb_module_name>
+    <vb_function_name>CheckScript</vb_function_name>
+    <vb_metadata>master</vb_metadata>
+    <vb_parameters>
+
+      <verify>
+        <when>
+          <test l="model" op="="><r><list_value key="type" listref="FileType"/></r></test>
+        </when>
+        <select what="references">
+          <models>
+            <test l="$model.type$" op="=" r="design" />
+          </models>
+        </select>
+        <if>
+          <where>
+            <test l="$type$" op="=" r="Model Reference"/>
+            <test l="$reference.nest_level$" op="&lt;" r="2" numeric="yes" />
+          </where>
+          <msg id="false">Error in model: $reference.name$ has a nest depth of '$reference.nest_level$'.</msg>
+        </if>    
+      </verify>
+
+      <verify>
+        <when>
+          <test l="compmodel" op="="><r><list_value key="type" listref="FileType"/></r></test>
+        </when>
+        <select what="references">
+          <models>
+            <test l="$model.type$" op="=" r="design" />
+          </models>
+        </select>
+        <if>
+          <where>
+            <test l="$type$" op="=" r="Model Reference"/>
+            <test l="$reference.nest_level$" op="&lt;" r="3" numeric="yes" />
+          </where>
+          <msg id="false">Error in Master Model: $reference.name$ has a nest depth of '$reference.nest_level$'.</msg>
+        </if>    
+      </verify>
+      
+      <verify>
+        <when>
+          <test l="drawing" op="="><r><list_value key="type" listref="FileType"/></r></test>
+        </when>
+        <select what="references">
+          <models />
+            
+        </select>
+        <if>
+          <where>
+            <test l="$type$" op="=" r="Model Reference"/>
+            <test l="$reference.nest_level$" op="&lt;" r="3" numeric="yes" />
+          </where>
+          <msg id="false">Error in Drawing: $reference.name$ has a nest depth of '$reference.nest_level$'.</msg>
+        </if>    
+      </verify>
+
+
+      <msg id="skip">Checking Skipped as not a valid file for checking based on Document Type</msg>
+      <msg id="pass">No errors found. Check passed.</msg>
+    </vb_parameters>
+  </options>
+</rule>

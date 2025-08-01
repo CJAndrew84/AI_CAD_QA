@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<rule>
+  <name>VBA2</name>
+  <options>
+    <documentation>
+      Check to ensure all attached references originate from ProjectWise
+    </documentation>
+    <vb_project_name>CADCheckLibrary</vb_project_name>
+    <vb_module_name>Checks</vb_module_name>
+    <vb_function_name>CheckScript</vb_function_name>
+    <vb_metadata>master</vb_metadata>
+    <vb_parameters>
+
+      <verify>
+        <select what="references" >
+          <where />
+        </select>
+        <!-- Is Reference from PW-->
+        <if>
+          <where>
+            <or>
+              <test l="$reference.is_from_pw$" op="i=" r="true" />
+            </or>
+          </where>
+          <msg id="false">Reference $name$ was not attached through PW.</msg>
+        </if>
+      </verify>
+
+    </vb_parameters>
+  </options>
+</rule>

@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<rule>
+  <name>VBA2</name>
+  <options>
+    <documentation>
+      Rule 1 - Level Check.
+      Level names to comply with ISO 13567-2 / GG184
+    </documentation>
+    <vb_project_name>CADCheckLibrary</vb_project_name>
+    <vb_module_name>Checks</vb_module_name>
+    <vb_function_name>CheckScript</vb_function_name>
+    <vb_metadata>hierarchy</vb_metadata>
+    <vb_parameters>
+
+      <table name="Classification.tbl">
+        <key>Classification</key>
+        <source>Classification.csv</source>
+      </table>
+      
+      <list name="Classification">
+        <load_table_keys table="Classification.tbl" />
+      </list>
+
+      <msg_limits group="lvl">
+        <soft limit="50">Found {1} level errors. First {2} errors were reported.</soft>
+        <hard limit ="1000">Check terminated after {1} errors.</hard>
+      </msg_limits>
+
+      <verify>
+            <when>
+                       
+            </when>
+            <select what="levels" />
+            <!-- Check if a level if from the library -->
+            <if>
+              <where>
+              <and>
+                
+                <test l="$level.name$" op="i!=" r="Default" />
+                <test l="$level.name$" op="i!=" r="0" />
+                <test l="$level.name$" op="i!=" r="Defpoints" /> <!-- Ignore AutoCAD Defpoints layer-->
+                <!--Remove following line if you want to check empty levels as well-->
+                <!--<test l="$level.is_used$" op="=" r="True" />-->
+              </and>
+              </where>
+              <if>
+                <where>
+                  <or>
+                    <test op="!=">
+                      <l>
+                        <!--<extract p='^([a-zA-Z]{2})-([a-zA-Z]{2})_(.*)|^([zZ]{1})-([a-zA-Z]{2})_(.*)' n='1' n2='1'>$level.name$</extract>-->
+                        <extract p='^([a-zA-Z]{1,2})-([a-zA-Z]{2})\d*-([a-zA-Z])-\w+' n='1' n2='1'>$level.name$</extract> <!--ISO 13567-->
+                      </l>
+                      <r></r>
+                    </test>
+                    <test op="=">
+                      <l>
+                        <extract n='1' n2='4'>$level.name$</extract>
+                      </l>
+                      <r>Z</r>
+                    </test>
+                  </or>  
+                  
+                </where>
+                  
+                <if>
+                  <where>
+                    <or>
+                    <in listref="Classification">
+                      <key>
+                        <extract n='1' n2='2'>$level.name$</extract>
+                      </key>
+                    </in>
+                    <test op="=">
+                      <l>
+                        <extract n='1' n2='5'>$level.name$</extract>
+                      </l>
+                      <r>Zz</r>
+                    </test>
+                    </or>
+                  </where>
+                  <msg id="false" group="lvl">Error: level $level.name$ is using an incorrect Classification Code</msg>
+                </if>
+                
+                <msg id="false" group="lvl">Error: level $level.name$ structure is incorrect</msg>
+              </if>  
+         
+            </if>
+          </verify>
+
+      <msg id="skip">Checking Skipped as not a valid file for checking based on Document Type</msg>
+      <msg id="pass">No errors found. Check passed.</msg>
+    </vb_parameters>
+  </options>
+</rule>

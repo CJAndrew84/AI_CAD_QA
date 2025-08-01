@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rule>
+  <name>VBA2</name>
+  <options>
+    <documentation>
+      Drawing only check.
+      A drawings Model Space should not contain any live graphical content.
+    </documentation>
+    <vb_project_name>CADCheckLibrary</vb_project_name>
+    <vb_module_name>Checks</vb_module_name>
+    <vb_function_name>CheckScript</vb_function_name>
+    <vb_metadata>master</vb_metadata>
+    <vb_parameters>
+
+      <verify>
+        <when>
+            <test l="drawing" op="="><r><list_value key="type" listref="FileType"/></r></test>
+        </when>
+
+        <select what="elements">
+          <models>
+            <test l="$model.type$" op="=" r="design" />
+          </models>
+          <include_type>All</include_type>
+        </select>
+
+        <count how="full">
+          <where>
+            <test l='$element.has_level$' op='=' r='True' />
+          </where>
+          <msg id="pass">No live elements found in Model Space (Design Model).</msg>
+          <msg id="more">Error: {1}  elements found in Model Space (Design Model).</msg>
+          <range>0</range>
+        </count>
+      </verify>
+
+      <msg id="skip">Checking Skipped as not a valid file for checking based on Document Type</msg>
+      <msg id="pass">No errors found. Check passed.</msg>
+    </vb_parameters>
+  </options>
+</rule>

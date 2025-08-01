@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<qa_settings>
+  
+  <checker target="drawing">
+
+    <rule type="mandatory" id="_init">
+      <name>VBA2</name>
+      <options>
+        <documentation />
+        <vb_project_name>CADCheckLibrary</vb_project_name>
+        <vb_module_name>Checks</vb_module_name>
+        <vb_function_name>CheckScript</vb_function_name>
+        <vb_metadata>master</vb_metadata>
+        <vb_parameters>
+          <version name='General_Checks.xml'>v0.10 (09-07-2018)</version>
+        </vb_parameters>
+      </options>
+    </rule>
+    
+    <rule type="mandatory" id="GeneralCheck">
+      <name>VBA2</name>
+      <options>
+        <documentation>
+          <ul>
+            <li>Test Check Should always pass</li>
+          </ul>
+        </documentation>
+        <vb_project_name>CADCheckLibrary</vb_project_name>
+        <vb_module_name>Checks</vb_module_name>
+        <vb_function_name>CheckScript</vb_function_name>
+        <vb_metadata>master</vb_metadata>
+        <vb_parameters>
+
+          <verify>
+            <select what="file" >
+              <where />
+            </select>
+
+            <if>
+              <where>
+                <test l="$file_format$" op="=" r="dgn8" />
+              </where>
+              <msg id="true">DGN8 Format Document</msg>
+              <msg id="false" level="info">Some other Format</msg>              
+            </if>
+
+          </verify>
+
+        </vb_parameters>
+      </options>
+    </rule>
+  </checker>
+</qa_settings>

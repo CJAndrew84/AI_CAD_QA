@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+
+<qa_settings>
+
+  <checker target="metadata">
+    <rule type="mandatory" id="1">
+       <name>Test rule</name>
+       <options>
+          <return>Passed</return>
+       </options>
+       <messages/>
+       <report_stylesheet>testmandatory.xsl</report_stylesheet> 
+    </rule>
+
+  </checker>
+
+</qa_settings>

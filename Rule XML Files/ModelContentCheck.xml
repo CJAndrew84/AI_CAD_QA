@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--<rule type="Advisory" id="Models Content Check">-->
+<rule>
+  <name>VBA2</name>
+  <options>
+    <documentation>
+      DGN Format Check Only.
+      Checks models within Model files have a default Logical Name assigned      
+    </documentation>
+    <vb_project_name>CADCheckLibrary</vb_project_name>
+    <vb_module_name>Checks</vb_module_name>
+    <vb_function_name>CheckScript</vb_function_name>
+    <vb_metadata>master</vb_metadata>
+    <vb_parameters>
+
+      <verify>
+        <when>
+          <and>
+            <test l="dgn" op="="><r><list_value key="type" listref="FileFormat"/></r></test>
+          <or>
+            <test l="model" op="="><r><list_value key="type" listref="FileType"/></r></test>
+            <test l="compmodel" op="="><r><list_value key="type" listref="FileType"/></r></test>
+          </or>
+          </and>
+        </when>
+        <select what="models">
+          <models>
+            <test l="$model.type$" op="=" r="design" />
+          </models>
+        </select>
+        <if>
+          <where>
+            <test l="$model.logical_name$" op="!=" r="" />
+          </where>
+          <msg id="false">Logical Name field for $model.name$ is empty</msg>
+        </if>
+      </verify>
+
+      <msg id="skip">Checking Skipped as not a valid file for checking based on Document Type</msg>
+      <msg id="pass">No errors found. Check passed.</msg>
+    </vb_parameters>
+  </options>
+</rule>

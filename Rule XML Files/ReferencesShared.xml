@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<rule>
+  <name>VBA2</name>
+  <options>
+    <documentation>
+      Checks all references are shared for Drawings, Composite and Master Models.
+      
+    </documentation>
+    <vb_project_name>CADCheckLibrary</vb_project_name>
+    <vb_module_name>Checks</vb_module_name>
+    <vb_function_name>CheckScript</vb_function_name>
+    <vb_metadata>hierarchy</vb_metadata>
+    <vb_parameters>
+
+      <verify>
+        <when>
+         <!-- <test l="true" op="="><r><list_value key="type" listref="SharedRef"/></r></test> -->
+        </when>
+        <select what="references">
+              <unique_references />
+              <where>
+                <test l="$is_selfref$" op="=" r="False"/>
+                <test l="$is_from_pw$" op="=" r="True"/>
+              </where>
+            </select>
+        <!-- Has reference been approved.-->
+        <if>
+          <where>
+              <test l="$R:attributes/attribute[@name='PW_REF_STATUS']$" op="i=" r="APPROVED" />
+          </where>
+          <msg id="false">Failed for one of two reasons: Reference $name$ from $reference.file_name$ has not been advanced to Shared in the worklfow (this applied the Approved Model Ref Status) , or the reference has no PW environment applied, containing the attribute for Model Ref Status .</msg>
+        </if>
+
+<msg id="pass">Passed.  </msg>
+        <msg id="fail" >Failed.</msg>
+
+      </verify>
+
+<msg id="skip">Checking Skipped</msg>
+      <msg id="pass">No errors found. Check passed.</msg>
+
+    </vb_parameters>
+  </options>
+</rule>
