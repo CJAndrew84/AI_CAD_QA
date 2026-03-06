@@ -122,8 +122,8 @@ public sealed class XmlRuleLoader
                 .ToList();
 
             loaded.Add(new RuleDefinition(
-                RuleId: (string?)rule.Attribute("id") ?? "unknown",
-                Name: rule.Element("name")?.Value ?? (string?)rule.Attribute("id") ?? "unknown",
+                RuleId: (string?)rule.Attribute("id") ?? Path.GetFileNameWithoutExtension(path),
+                Name: rule.Element("name")?.Value ?? (string?)rule.Attribute("id") ?? Path.GetFileNameWithoutExtension(path),
                 Severity: severity,
                 SourceFile: path,
                 Checks: checks

@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "qaagent": {
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "dotnet/src/QaAgent.McpServer/QaAgent.McpServer.csproj"
+      ],
+      "env": {
+        "QA_MASTER_XML": "./Rule XML Masters/Master.xml",
+        "QA_RULES_DIR": "./Rule XML Files"
+      }
+    }
+  }
+}

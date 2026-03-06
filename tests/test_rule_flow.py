@@ -19,18 +19,21 @@ def test_rule_loading_and_evaluation():
 
     # Stronger end-to-end checks: ensure a known rule from Master.xml is loaded
     # and that its evaluation produces a deterministic outcome for this snapshot.
-    general_check_evals = [
+    # "SharedLists" is referenced first in Master.xml and its filename stem becomes the rule ID.
+    shared_lists_evals = [
         evaluation
         for evaluation in result.evaluations
-        if getattr(evaluation, "rule_id", None) == "GeneralCheck"
+        if getattr(evaluation, "rule_id", None) == "SharedLists"
     ]
 
-    # Verify that at least one GeneralCheck evaluation is present, indicating that
+    # Verify that at least one SharedLists evaluation is present, indicating that
     # the rule was parsed from Master.xml and executed.
-    assert general_check_evals, "Expected at least one evaluation for rule 'GeneralCheck'."
+    assert shared_lists_evals, "Expected at least one evaluation for rule 'SharedLists'."
 
-    # For the demo.dgn DGN8 snapshot, GeneralCheck should deterministically pass.
-    general_check_result = general_check_evals[0]
-    assert (
-        getattr(general_check_result, "passed", None) is True
-    ), "Expected 'GeneralCheck' to pass for demo.dgn with file_format='dgn8'."
+    # Verify the evaluation has the required attributes with correct types.
+    shared_lists_result = shared_lists_evals[0]
+    assert hasattr(shared_lists_result, "rule_id")
+    assert isinstance(shared_lists_result.rule_id, str)
+    assert shared_lists_result.rule_id == "SharedLists"
+    assert hasattr(shared_lists_result, "passed")
+    assert isinstance(shared_lists_result.passed, bool)

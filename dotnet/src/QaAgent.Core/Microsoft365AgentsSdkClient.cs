@@ -58,21 +58,31 @@ public sealed class Microsoft365AgentsSdkClient : IAiAdvisor
         };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _bearerToken);
 
-        using var response = await _httpClient.SendAsync(request, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        try
+        {
+            using var response = await _httpClient.SendAsync(request, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                return OfflineAdvice(failed);
+            }
 
-        var json = await response.Content.ReadAsStringAsync(cancellationToken);
-        using var document = JsonDocument.Parse(json);
+            var json = await response.Content.ReadAsStringAsync(cancellationToken);
+            using var document = JsonDocument.Parse(json);
 
-        // Accept a few common response shapes.
-        var content = TryGetText(document.RootElement) ?? "Review failed checks.";
+            // Accept a few common response shapes.
+            var content = TryGetText(document.RootElement) ?? "Review failed checks.";
 
-        var lines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Select(line => line.TrimStart('-', ' '))
-            .Where(line => !string.IsNullOrWhiteSpace(line))
-            .ToList();
+            var lines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(line => line.TrimStart('-', ' '))
+                .Where(line => !string.IsNullOrWhiteSpace(line))
+                .ToList();
 
-        return new CopilotAdvice(lines.FirstOrDefault() ?? "Review failed checks.", lines.Skip(1).Take(3).ToList());
+            return new CopilotAdvice(lines.FirstOrDefault() ?? "Review failed checks.", lines.Skip(1).Take(3).ToList());
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException or InvalidOperationException)
+        {
+            return OfflineAdvice(failed);
+        }
     }
 
     private static string? TryGetText(JsonElement root)
