@@ -4,7 +4,7 @@ using System.Text.Json;
 
 namespace QaAgent.Core;
 
-public sealed class MsCopilotClient
+public sealed class MsCopilotClient : IAiAdvisor
 {
     private readonly HttpClient _httpClient;
     private readonly string? _endpoint;

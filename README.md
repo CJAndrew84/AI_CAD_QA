@@ -1,6 +1,6 @@
 # PW_CAD_QA – AI CAD QA Agent
 
-This repo now includes both:
+This repo includes:
 
 - a **Python prototype** for XML QA evaluation + Copilot guidance, and
 - **.NET add-on scaffolding** for AutoCAD and MicroStation hosts.
@@ -12,38 +12,48 @@ The goal is an embedded AI CAD QA agent that watches design activity and provide
 - Master: `Rule XML Masters/Master.xml`
 - Referenced rule packs: `Rule XML Files/*.xml`
 
-## .NET add-ons (new)
+## .NET add-ons
 
 ### Projects
 
 - `dotnet/src/QaAgent.Core`
-  - XML loader (`XmlRuleLoader`) for `Master.xml` and referenced XML files.
-  - Rule evaluator (`RuleEngine`) for `<test>` checks.
-  - Copilot client (`MsCopilotClient`) with endpoint mode + offline fallback.
-  - Orchestrator (`QaCopilotOrchestrator`) as the runtime pipeline.
+  - `XmlRuleLoader`: loads `Master.xml` and referenced XML files.
+  - `RuleEngine`: evaluates XML `<test>` checks.
+  - `QaCopilotOrchestrator`: end-to-end rule evaluation + AI guidance pipeline.
+  - `IAiAdvisor` + `AiAdvisorFactory`: pluggable AI back-end selection.
+  - `MsCopilotClient`: Azure OpenAI-style Copilot endpoint client.
+  - `Microsoft365AgentsSdkClient`: Microsoft 365 Agents-compatible client adapter.
 - `dotnet/src/QaAgent.AutoCAD`
-  - `AutoCadQaAddin` to subscribe to document change events and push QA/copilot messages to a panel.
+  - `AutoCadQaAddin`: subscribes to document change events and renders QA results.
 - `dotnet/src/QaAgent.MicroStation`
-  - `MicroStationQaAddin` to subscribe to design-file change events and push QA/copilot messages to a dockable pane.
+  - `MicroStationQaAddin`: subscribes to design-file change events and renders QA results.
 - `dotnet/QaAgent.sln`
-  - Visual Studio solution containing all three projects.
+  - Visual Studio solution containing all projects.
 
-### Copilot configuration
+## Copilot / Microsoft 365 Agents configuration
 
-1. Copy `.env.example` to `.env` and fill in your values:
+1. Copy `.env.example` to `.env` and fill in values:
 
 ```bash
 cp .env.example .env
 ```
 
-2. Configure the following variables (in `.env` or your host environment):
+2. Choose one runtime mode:
 
-- `MS_COPILOT_ENDPOINT`
-- `MS_COPILOT_API_KEY`
+- **Microsoft 365 Agents mode (preferred when available):**
+  - `M365_AGENTS_MESSAGES_ENDPOINT`
+  - `M365_AGENTS_BEARER_TOKEN`
+- **Azure OpenAI-style Copilot mode (fallback/default):**
+  - `MS_COPILOT_ENDPOINT`
+  - `MS_COPILOT_API_KEY`
 
-If unset, add-ons still run and emit offline QA guidance.
+`QaCopilotOrchestrator` uses `AiAdvisorFactory` to auto-select:
 
-### Build (on a machine with .NET SDK)
+- Agents mode if both `M365_AGENTS_*` values are set.
+- Otherwise, Copilot mode.
+- If neither is configured, offline fallback guidance is returned.
+
+## Build (on a machine with .NET SDK)
 
 ```bash
 dotnet build dotnet/QaAgent.sln
