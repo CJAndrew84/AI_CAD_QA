@@ -30,7 +30,13 @@ The goal is an embedded AI CAD QA agent that watches design activity and provide
 
 ### Copilot configuration
 
-Set environment variables for live Copilot responses:
+1. Copy `.env.example` to `.env` and fill in your values:
+
+```bash
+cp .env.example .env
+```
+
+2. Configure the following variables (in `.env` or your host environment):
 
 - `MS_COPILOT_ENDPOINT`
 - `MS_COPILOT_API_KEY`
