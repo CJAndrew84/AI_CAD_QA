@@ -24,23 +24,30 @@ public sealed class AutoCadQaAddin
 
     private async void OnDocumentChanged(object? sender, DocumentChangedEventArgs e)
     {
-        var snapshot = new DocumentSnapshot(
-            Platform: "AutoCAD",
-            FilePath: e.DrawingPath,
-            FileFormat: e.FileFormat
-        );
-
-        var result = await _orchestrator.RunAsync(snapshot);
-        var failed = result.Evaluations.Where(v => !v.Passed).ToList();
-
-        if (failed.Count == 0)
+        try
         {
-            _host.ShowQaPanel("CAD QA", "✅ AutoCAD QA: all checks passed.");
-            return;
-        }
+            var snapshot = new DocumentSnapshot(
+                Platform: "AutoCAD",
+                FilePath: e.DrawingPath,
+                FileFormat: e.FileFormat
+            );
 
-        var lines = result.Advice.Actions.Select(a => $"- {a}");
-        var message = $"⚠️ AutoCAD QA found {failed.Count} issue(s).\n{result.Advice.Summary}\n{string.Join("\n", lines)}";
-        _host.ShowQaPanel("CAD QA", message);
+            var result = await _orchestrator.RunAsync(snapshot);
+            var failed = result.Evaluations.Where(v => !v.Passed).ToList();
+
+            if (failed.Count == 0)
+            {
+                _host.ShowQaPanel("CAD QA", "✅ AutoCAD QA: all checks passed.");
+                return;
+            }
+
+            var lines = result.Advice.Actions.Select(a => $"- {a}");
+            var message = $"⚠️ AutoCAD QA found {failed.Count} issue(s).\n{result.Advice.Summary}\n{string.Join("\n", lines)}";
+            _host.ShowQaPanel("CAD QA", message);
+        }
+        catch (Exception ex)
+        {
+            _host.ShowQaPanel("CAD QA", $"⚠️ AutoCAD QA is temporarily unavailable.\nDetails: {ex.Message}");
+        }
     }
 }
