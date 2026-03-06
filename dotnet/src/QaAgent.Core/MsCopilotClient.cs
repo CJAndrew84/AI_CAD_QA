@@ -79,7 +79,7 @@ public sealed class MsCopilotClient : IAiAdvisor
 
             return new CopilotAdvice(lines.FirstOrDefault() ?? "Review failed checks.", lines.Skip(1).Take(3).ToList());
         }
-        catch
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException or InvalidOperationException or KeyNotFoundException)
         {
             return OfflineAdvice(failed);
         }

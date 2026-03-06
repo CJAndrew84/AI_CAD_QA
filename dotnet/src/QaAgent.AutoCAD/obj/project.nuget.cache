@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "+yZNWWuzzE8=",
+  "success": true,
+  "projectFilePath": "/home/runner/work/PW_CAD_QA/PW_CAD_QA/dotnet/src/QaAgent.AutoCAD/QaAgent.AutoCAD.csproj",
+  "expectedPackageFiles": [
+    "/tmp/codeql-scratch-5bfbcf4a94aefcc4/dbs/csharp/working/packages/microsoft.netcore.app.ref/8.0.23/microsoft.netcore.app.ref.8.0.23.nupkg.sha512",
+    "/tmp/codeql-scratch-5bfbcf4a94aefcc4/dbs/csharp/working/packages/microsoft.aspnetcore.app.ref/8.0.23/microsoft.aspnetcore.app.ref.8.0.23.nupkg.sha512"
+  ],
+  "logs": []
+}

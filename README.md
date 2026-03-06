@@ -2,8 +2,9 @@
 
 This repo includes:
 
-- a **Python prototype** for XML QA evaluation + Copilot guidance, and
-- **.NET add-on scaffolding** for AutoCAD and MicroStation hosts.
+- a **Python prototype** for XML QA evaluation + Copilot guidance,
+- **.NET add-on scaffolding** for AutoCAD and MicroStation hosts, and
+- a **.NET MCP server** so MCP clients (Claude Desktop, VS Code-compatible MCP clients, etc.) can query QA checks while CAD is in use.
 
 The goal is an embedded AI CAD QA agent that watches design activity and provides rule-compliance guidance from your XML QA rules.
 
@@ -12,7 +13,7 @@ The goal is an embedded AI CAD QA agent that watches design activity and provide
 - Master: `Rule XML Masters/Master.xml`
 - Referenced rule packs: `Rule XML Files/*.xml`
 
-## .NET add-ons
+## .NET projects
 
 ### Projects
 
@@ -27,6 +28,8 @@ The goal is an embedded AI CAD QA agent that watches design activity and provide
   - `AutoCadQaAddin`: subscribes to document change events and renders QA results.
 - `dotnet/src/QaAgent.MicroStation`
   - `MicroStationQaAddin`: subscribes to design-file change events and renders QA results.
+- `dotnet/src/QaAgent.McpServer`
+  - MCP stdio server exposing QA tools for external assistants.
 - `dotnet/QaAgent.sln`
   - Visual Studio solution containing all projects.
 
@@ -53,11 +56,39 @@ cp .env.example .env
 - Otherwise, Copilot mode.
 - If neither is configured, offline fallback guidance is returned.
 
+## MCP server configuration
+
+Optional environment variables for the MCP tools:
+
+- `QA_MASTER_XML` (default: `./Rule XML Masters/Master.xml`)
+- `QA_RULES_DIR` (default: `./Rule XML Files`)
+
+## MCP tools
+
+`QaAgent.McpServer` exposes:
+
+- `qa.evaluate_file`
+  - Inputs: `platform`, `filePath`, `fileFormat`, optional `masterXml`, `rulesDir`.
+  - Returns: total/failed rule count + failure details + AI advice.
+- `qa.list_rule_files`
+  - Inputs: optional `masterXml`, `rulesDir`.
+  - Returns: distinct referenced XML rule files.
+
 ## Build (on a machine with .NET SDK)
 
 ```bash
 dotnet build dotnet/QaAgent.sln
 ```
+
+## Run MCP server (stdio)
+
+```bash
+dotnet run --project dotnet/src/QaAgent.McpServer/QaAgent.McpServer.csproj
+```
+
+Configure your MCP client (Claude Desktop / VS Code MCP extension) to launch the command above.
+
+You can start from `mcp.config.example.json` for a client-side MCP configuration template.
 
 ## Python prototype (kept)
 

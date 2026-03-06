@@ -74,7 +74,7 @@ class XmlRuleLoader:
                 )
             loaded.append(
                 RuleDefinition(
-                    rule_id=rule.get("id", "unknown"),
+                    rule_id=rule.get("id") or path.stem,
                     name=name,
                     severity=severity,
                     source_file=path,
