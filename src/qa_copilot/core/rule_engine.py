@@ -45,7 +45,7 @@ class RuleEngine:
         right = self._resolve_token(check.right, snapshot)
         op = check.op.strip().lower()
 
-        if op == "=":
+        if op in ("=", "i="):
             return str(left).lower() == str(right).lower()
         if op == "!=":
             return str(left).lower() != str(right).lower()
