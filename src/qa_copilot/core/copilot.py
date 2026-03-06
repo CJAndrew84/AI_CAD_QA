@@ -63,13 +63,15 @@ class MsCopilotClient:
             },
             method="POST",
         )
-        with request.urlopen(req, timeout=15) as response:
-            body = json.loads(response.read().decode("utf-8"))
-
-        text = body["choices"][0]["message"]["content"]
-        lines = [line.strip("- ") for line in text.splitlines() if line.strip()]
-        return CopilotAdvice(summary=lines[0] if lines else "Review failed checks.", actions=lines[1:4])
-
+        try:
+            with request.urlopen(req, timeout=15) as response:
+                body = json.loads(response.read().decode("utf-8"))
+            text = body["choices"][0]["message"]["content"]
+            lines = [line.strip("- ") for line in text.splitlines() if line.strip()]
+            return CopilotAdvice(summary=lines[0] if lines else "Review failed checks.", actions=lines[1:4])
+        except Exception:
+            # On network/HTTP/JSON/schema errors, fall back to offline advice
+            return self._offline_advice(failed)
     @staticmethod
     def _offline_advice(failed: list[RuleEvaluation]) -> CopilotAdvice:
         if not failed:
