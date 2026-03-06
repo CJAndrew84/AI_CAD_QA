@@ -1,4 +1,4 @@
-# PW_CAD_QA – AI CAD QA Agent
+# AI_CAD_QA – AI CAD QA Agent
 
 This repo includes:
 
