@@ -15,6 +15,8 @@ The goal is an embedded AI CAD QA agent that watches design activity and provide
 
 ## .NET projects
 
+### Projects
+
 - `dotnet/src/QaAgent.Core`
   - `XmlRuleLoader`: loads `Master.xml` and referenced XML files.
   - `RuleEngine`: evaluates XML `<test>` checks.

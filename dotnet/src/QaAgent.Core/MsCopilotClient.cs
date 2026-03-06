@@ -56,23 +56,33 @@ public sealed class MsCopilotClient : IAiAdvisor
         request.Headers.Add("api-key", _apiKey);
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-        using var response = await _httpClient.SendAsync(request, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        try
+        {
+            using var response = await _httpClient.SendAsync(request, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                return OfflineAdvice(failed);
+            }
 
-        var json = await response.Content.ReadAsStringAsync(cancellationToken);
-        using var document = JsonDocument.Parse(json);
-        var content = document.RootElement
-            .GetProperty("choices")[0]
-            .GetProperty("message")
-            .GetProperty("content")
-            .GetString() ?? "Review failed checks.";
+            var json = await response.Content.ReadAsStringAsync(cancellationToken);
+            using var document = JsonDocument.Parse(json);
+            var content = document.RootElement
+                .GetProperty("choices")[0]
+                .GetProperty("message")
+                .GetProperty("content")
+                .GetString() ?? "Review failed checks.";
 
-        var lines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Select(line => line.TrimStart('-', ' '))
-            .Where(line => !string.IsNullOrWhiteSpace(line))
-            .ToList();
+            var lines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(line => line.TrimStart('-', ' '))
+                .Where(line => !string.IsNullOrWhiteSpace(line))
+                .ToList();
 
-        return new CopilotAdvice(lines.FirstOrDefault() ?? "Review failed checks.", lines.Skip(1).Take(3).ToList());
+            return new CopilotAdvice(lines.FirstOrDefault() ?? "Review failed checks.", lines.Skip(1).Take(3).ToList());
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException or InvalidOperationException or KeyNotFoundException)
+        {
+            return OfflineAdvice(failed);
+        }
     }
 
     private static CopilotAdvice OfflineAdvice(IReadOnlyList<RuleEvaluation> failed)

@@ -44,7 +44,7 @@ public sealed class RuleEngine
 
         return op switch
         {
-            "=" => string.Equals(left, right, StringComparison.OrdinalIgnoreCase),
+            "=" or "i=" => string.Equals(left, right, StringComparison.OrdinalIgnoreCase),
             "!=" => !string.Equals(left, right, StringComparison.OrdinalIgnoreCase),
             "contains" or "in" => left.Contains(right, StringComparison.OrdinalIgnoreCase),
             _ => false,

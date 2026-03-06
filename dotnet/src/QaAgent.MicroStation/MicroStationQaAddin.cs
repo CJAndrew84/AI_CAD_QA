@@ -24,23 +24,34 @@ public sealed class MicroStationQaAddin
 
     private async void OnDesignFileChanged(object? sender, DesignFileChangedEventArgs e)
     {
-        var snapshot = new DocumentSnapshot(
-            Platform: "MicroStation",
-            FilePath: e.DgnPath,
-            FileFormat: e.FileFormat
-        );
-
-        var result = await _orchestrator.RunAsync(snapshot);
-        var failed = result.Evaluations.Where(v => !v.Passed).ToList();
-
-        if (failed.Count == 0)
+        try
         {
-            _host.ShowQaDockablePane("CAD QA", "✅ MicroStation QA: all checks passed.");
-            return;
-        }
+            var snapshot = new DocumentSnapshot(
+                Platform: "MicroStation",
+                FilePath: e.DgnPath,
+                FileFormat: e.FileFormat
+            );
 
-        var lines = result.Advice.Actions.Select(a => $"- {a}");
-        var message = $"⚠️ MicroStation QA found {failed.Count} issue(s).\n{result.Advice.Summary}\n{string.Join("\n", lines)}";
-        _host.ShowQaDockablePane("CAD QA", message);
+            var result = await _orchestrator.RunAsync(snapshot);
+            var failed = result.Evaluations.Where(v => !v.Passed).ToList();
+
+            if (failed.Count == 0)
+            {
+                _host.ShowQaDockablePane("CAD QA", "✅ MicroStation QA: all checks passed.");
+                return;
+            }
+
+            var lines = result.Advice.Actions.Select(a => $"- {a}");
+            var message = $"⚠️ MicroStation QA found {failed.Count} issue(s).\n{result.Advice.Summary}\n{string.Join("\n", lines)}";
+            _host.ShowQaDockablePane("CAD QA", message);
+        }
+        catch (Exception ex)
+        {
+            _host.ShowQaDockablePane(
+                "CAD QA",
+                $"❌ MicroStation QA is temporarily unavailable for '{e.DgnPath}'.\n" +
+                $"Error: {ex.Message}"
+            );
+        }
     }
 }
