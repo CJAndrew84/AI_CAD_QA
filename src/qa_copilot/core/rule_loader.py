@@ -55,11 +55,19 @@ class XmlRuleLoader:
             name = rule.findtext("name") or rule.get("id", "unknown")
             checks = []
             for test in rule.findall(".//test"):
+                # Support both attribute-based and nested <r> elements for the right-hand side.
+                right_value = test.attrib.get("r")
+                if not right_value:
+                    r_elem = test.find("r")
+                    if r_elem is not None and r_elem.text is not None:
+                        right_value = r_elem.text.strip()
+                    else:
+                        right_value = ""
                 checks.append(
                     RuleCheck(
                         left=test.attrib.get("l", ""),
                         op=test.attrib.get("op", "="),
-                        right=test.attrib.get("r", ""),
+                        right=right_value,
                         true_message=rule.findtext(".//msg[@id='true']"),
                         false_message=rule.findtext(".//msg[@id='false']"),
                     )
