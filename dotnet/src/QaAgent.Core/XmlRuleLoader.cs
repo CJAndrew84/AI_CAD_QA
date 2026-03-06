@@ -82,13 +82,43 @@ public sealed class XmlRuleLoader
             var severityText = ((string?)rule.Attribute("type") ?? "advisory").ToLowerInvariant();
             var severity = severityText == "mandatory" ? RuleSeverity.Mandatory : RuleSeverity.Advisory;
             var checks = rule.Descendants("test")
-                .Select(test => new RuleCheck(
-                    test.Attribute("l")?.Value ?? string.Empty,
-                    test.Attribute("op")?.Value ?? "=",
-                    test.Attribute("r")?.Value ?? string.Empty,
-                    rule.Descendants("msg").FirstOrDefault(x => (string?)x.Attribute("id") == "true")?.Value,
-                    rule.Descendants("msg").FirstOrDefault(x => (string?)x.Attribute("id") == "false")?.Value
-                ))
+                .Select(test =>
+                {
+                    // Prefer attribute-based operands; fall back to nested elements if needed.
+                    var left = test.Attribute("l")?.Value;
+                    if (string.IsNullOrWhiteSpace(left))
+                    {
+                        left = test.Element("l")?.Value;
+                    }
+                    left ??= string.Empty;
+
+                    var right = test.Attribute("r")?.Value;
+                    if (string.IsNullOrWhiteSpace(right))
+                    {
+                        right = test.Element("r")?.Value;
+                    }
+                    right ??= string.Empty;
+
+                    // If both operands are empty, this test likely uses an unsupported encoding; skip it.
+                    if (string.IsNullOrWhiteSpace(left) && string.IsNullOrWhiteSpace(right))
+                    {
+                        return null;
+                    }
+
+                    var op = test.Attribute("op")?.Value ?? "=";
+                    var trueMessage = rule.Descendants("msg").FirstOrDefault(x => (string?)x.Attribute("id") == "true")?.Value;
+                    var falseMessage = rule.Descendants("msg").FirstOrDefault(x => (string?)x.Attribute("id") == "false")?.Value;
+
+                    return new RuleCheck(
+                        left,
+                        op,
+                        right,
+                        trueMessage,
+                        falseMessage
+                    );
+                })
+                .Where(check => check is not null)
+                .Cast<RuleCheck>()
                 .ToList();
 
             loaded.Add(new RuleDefinition(
