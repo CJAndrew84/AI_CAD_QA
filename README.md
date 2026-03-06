@@ -1,58 +1,61 @@
-# PW_CAD_QA – QA Copilot Add-on Scaffolding
+# PW_CAD_QA – AI CAD QA Agent
 
-This repository now includes a working **QA Copilot orchestration layer** that reads your XML QA rules and can be embedded into:
+This repo now includes both:
 
-- **AutoCAD + AutoCAD verticals** (Civil 3D, Plant 3D, Map 3D, etc.)
-- **MicroStation + Bentley verticals** (OpenRoads, OpenBuildings, OpenRail, etc.)
+- a **Python prototype** for XML QA evaluation + Copilot guidance, and
+- **.NET add-on scaffolding** for AutoCAD and MicroStation hosts.
 
-## What was built
+The goal is an embedded AI CAD QA agent that watches design activity and provides rule-compliance guidance from your XML QA rules.
 
-- XML master/reference loader for the existing QA rule files.
-- Rule evaluation engine for XML `<test>` expressions.
-- Microsoft Copilot-compatible client (`MsCopilotClient`) that can call a Microsoft-hosted chat endpoint (Azure OpenAI-style) and return actionable remediation tips.
-- AutoCAD add-on adapter class that can be wired to document/database change events.
-- MicroStation add-on adapter class that can be wired to design file/model change events.
+## Existing QA rule sources
 
-## Project layout
+- Master: `Rule XML Masters/Master.xml`
+- Referenced rule packs: `Rule XML Files/*.xml`
 
-- `src/qa_copilot/core/`
-  - `rule_loader.py`: reads `Rule XML Masters/Master.xml` and referenced XML files.
-  - `rule_engine.py`: evaluates checks against a live `DocumentSnapshot`.
-  - `copilot.py`: composes QA failures into a Copilot prompt and fetches advice.
-  - `orchestrator.py`: single entry point used by both CAD platform adapters.
-- `src/qa_copilot/autocad/addon.py`
-  - AutoCAD adapter (`AutoCADQaCopilotAddOn`) and event model.
-- `src/qa_copilot/microstation/addon.py`
-  - MicroStation adapter (`MicroStationQaCopilotAddOn`) and event model.
-- `demo.py`
-  - Runs a local demonstration of both adapters.
+## .NET add-ons (new)
 
-## How to wire into real add-ins
+### Projects
 
-## AutoCAD / Verticals
+- `dotnet/src/QaAgent.Core`
+  - XML loader (`XmlRuleLoader`) for `Master.xml` and referenced XML files.
+  - Rule evaluator (`RuleEngine`) for `<test>` checks.
+  - Copilot client (`MsCopilotClient`) with endpoint mode + offline fallback.
+  - Orchestrator (`QaCopilotOrchestrator`) as the runtime pipeline.
+- `dotnet/src/QaAgent.AutoCAD`
+  - `AutoCadQaAddin` to subscribe to document change events and push QA/copilot messages to a panel.
+- `dotnet/src/QaAgent.MicroStation`
+  - `MicroStationQaAddin` to subscribe to design-file change events and push QA/copilot messages to a dockable pane.
+- `dotnet/QaAgent.sln`
+  - Visual Studio solution containing all three projects.
 
-1. Create a .NET plug-in (or Python bridge) that subscribes to document/database events.
-2. On events like save, object append/modify, xref attach, call `on_document_changed`.
-3. Show returned advice in a docked palette.
+### Copilot configuration
 
-## MicroStation / Verticals
-
-1. Create a .NET add-in that subscribes to design file/model events.
-2. On events like file save, reference attach, level changes, call `on_design_file_changed`.
-3. Show returned advice in a dockable pane/task dialog.
-
-## Configure Microsoft Copilot endpoint
-
-Set environment variables:
+Set environment variables for live Copilot responses:
 
 - `MS_COPILOT_ENDPOINT`
 - `MS_COPILOT_API_KEY`
 
-If not set, the add-ons still run with offline/local fallback guidance.
+If unset, add-ons still run and emit offline QA guidance.
 
-## Quick run
+### Build (on a machine with .NET SDK)
+
+```bash
+dotnet build dotnet/QaAgent.sln
+```
+
+## Python prototype (kept)
+
+- `src/qa_copilot/core/*` for XML loading/evaluation/orchestration.
+- `src/qa_copilot/autocad/addon.py` and `src/qa_copilot/microstation/addon.py` for event-driven prototype adapters.
+
+Run prototype demo:
 
 ```bash
 PYTHONPATH=src python3 demo.py
 ```
 
+Run test:
+
+```bash
+PYTHONPATH=src python3 -m pytest -q
+```
