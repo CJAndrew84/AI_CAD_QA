@@ -74,6 +74,10 @@
       <reference>TextStyleCheck.xml</reference>
     </rule>
 
+<rule type="advisory" id="Property Set / Item Type Checks">
+      <reference>PropertyItemTypeChecks.xml</reference>
+    </rule>
+
 <rule type="advisory" id="Dimension Style Checks">
       <reference>DimensionCheck.xml</reference>
     </rule>
