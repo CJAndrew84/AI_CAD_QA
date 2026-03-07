@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rule>
+  <name>VBA2</name>
+  <options>
+    <documentation>
+      DWG/DGN metadata classification check.
+
+      This ruleset includes:
+      1) Global mode: every checked element must have at least one Property Set OR one Item Type.
+      2) Criteria mode: selected elements must carry approved Property Set/Item Type names.
+      3) IFC class mode: if IFC class metadata is present, enforce class-specific PSet and QSet assignment.
+      4) ADMM class mode: if ADMM class metadata is present, enforce ADMM property assignment.
+
+      Notes:
+      - Token/property names vary by implementation (MicroStation Item Types vs AutoCAD Property Sets).
+      - Update class names and metadata token names below to match your CAD environment.
+    </documentation>
+    <vb_project_name>CADCheckLibrary</vb_project_name>
+    <vb_module_name>Checks</vb_module_name>
+    <vb_function_name>CheckScript</vb_function_name>
+    <vb_metadata>master</vb_metadata>
+    <vb_parameters>
+
+      <!--
+        GLOBAL MODE
+        Rule intent: Every design element must have at least one metadata container.
+        This allows either Property Set OR Item Type assignment.
+      -->
+      <verify>
+        <when>
+          <and>
+            <or>
+              <test l="drawing" op="="><r><list_value key="type" listref="FileType"/></r></test>
+              <test l="model" op="="><r><list_value key="type" listref="FileType"/></r></test>
+              <test l="compmodel" op="="><r><list_value key="type" listref="FileType"/></r></test>
+            </or>
+            <or>
+              <test l="dgn" op="="><r><list_value key="type" listref="FileFormat"/></r></test>
+              <test l="dwg" op="="><r><list_value key="type" listref="FileFormat"/></r></test>
+            </or>
+          </and>
+        </when>
+
+        <select what="elements">
+          <models>
+            <test l="$model.type$" op="=" r="design" />
+          </models>
+          <include_type>All</include_type>
+        </select>
+
+        <if>
+          <where>
+            <and>
+              <test l="$element.has_property_set$" op="!=" r="True" />
+              <test l="$element.has_item_type$" op="!=" r="True" />
+            </and>
+          </where>
+          <msg id="true" level="error">Error: Element ($model.name$:$id$) has neither Property Set nor Item Type assigned.</msg>
+        </if>
+      </verify>
+
+      <!--
+        CRITERIA MODE
+        Rule intent: For matching element selectors, enforce approved metadata containers.
+      -->
+      <verify>
+        <when>
+          <and>
+            <or>
+              <test l="drawing" op="="><r><list_value key="type" listref="FileType"/></r></test>
+              <test l="model" op="="><r><list_value key="type" listref="FileType"/></r></test>
+              <test l="compmodel" op="="><r><list_value key="type" listref="FileType"/></r></test>
+            </or>
+            <or>
+              <test l="dgn" op="="><r><list_value key="type" listref="FileFormat"/></r></test>
+              <test l="dwg" op="="><r><list_value key="type" listref="FileFormat"/></r></test>
+            </or>
+          </and>
+        </when>
+
+        <select what="elements">
+          <models>
+            <test l="$model.type$" op="=" r="design" />
+          </models>
+          <include_type>All</include_type>
+        </select>
+
+        <if>
+          <where>
+            <or>
+              <test l="$element.type$" op="i=" r="Cell" />
+              <test l="$element.type$" op="i=" r="BlockReference" />
+              <test l="$element.level.name$" op="like" r="A-ANNO*" />
+              <test l="$element.layer$" op="like" r="A-ANNO*" />
+              <test l="$element.block.name$" op="like" r="TB_*" />
+            </or>
+          </where>
+
+          <if>
+            <where>
+              <and>
+                <test l="$element.property_set.name$" op="i!=" r="PS_Default" />
+                <test l="$element.property_set.name$" op="i!=" r="PS_TitleBlock" />
+                <test l="$element.item_type.name$" op="i!=" r="IT_Default" />
+                <test l="$element.item_type.name$" op="i!=" r="IT_TitleBlock" />
+              </and>
+            </where>
+            <msg id="true" level="error">Error: Element ($model.name$:$id$) matched metadata criteria but does not have an approved Property Set/Item Type.</msg>
+          </if>
+        </if>
+      </verify>
+
+      <!--
+        IFC CLASS MODE
+        Rule intent:
+        - If IFC Class metadata exists, ensure class-specific PSet + QSet metadata is also attached.
+        - Update class names and required PSet/QSet names to your project standard.
+      -->
+      <verify>
+        <when>
+          <and>
+            <or>
+              <test l="drawing" op="="><r><list_value key="type" listref="FileType"/></r></test>
+              <test l="model" op="="><r><list_value key="type" listref="FileType"/></r></test>
+              <test l="compmodel" op="="><r><list_value key="type" listref="FileType"/></r></test>
+            </or>
+            <or>
+              <test l="dgn" op="="><r><list_value key="type" listref="FileFormat"/></r></test>
+              <test l="dwg" op="="><r><list_value key="type" listref="FileFormat"/></r></test>
+            </or>
+          </and>
+        </when>
+
+        <select what="elements">
+          <models>
+            <test l="$model.type$" op="=" r="design" />
+          </models>
+          <include_type>All</include_type>
+        </select>
+
+        <!-- Any IFC class assigned: require at least one IFC PSet and one IFC QSet -->
+        <if>
+          <where>
+            <or>
+              <test l="$element.ifc.class$" op="!=" r="" />
+              <test l="$element.ifc_class$" op="!=" r="" />
+            </or>
+          </where>
+          <if>
+            <where>
+              <or>
+                <test l="$element.ifc.pset.assigned$" op="!=" r="True" />
+                <test l="$element.ifc.qset.assigned$" op="!=" r="True" />
+              </or>
+            </where>
+            <msg id="true" level="error">Error: Element ($model.name$:$id$) has IFC Class '$element.ifc.class$' but required IFC PSet/QSet assignment is missing.</msg>
+          </if>
+        </if>
+
+        <!-- Example class-specific mappings -->
+        <if>
+          <where>
+            <or>
+              <test l="$element.ifc.class$" op="i=" r="IfcWall" />
+              <test l="$element.ifc_class$" op="i=" r="IfcWall" />
+            </or>
+          </where>
+          <if>
+            <where>
+              <or>
+                <test l="$element.ifc.pset.name$" op="i!=" r="Pset_WallCommon" />
+                <test l="$element.ifc.qset.name$" op="i!=" r="Qto_WallBaseQuantities" />
+              </or>
+            </where>
+            <msg id="true" level="error">Error: IFC class IfcWall on element ($model.name$:$id$) must include Pset_WallCommon and Qto_WallBaseQuantities.</msg>
+          </if>
+        </if>
+
+        <if>
+          <where>
+            <or>
+              <test l="$element.ifc.class$" op="i=" r="IfcDoor" />
+              <test l="$element.ifc_class$" op="i=" r="IfcDoor" />
+            </or>
+          </where>
+          <if>
+            <where>
+              <or>
+                <test l="$element.ifc.pset.name$" op="i!=" r="Pset_DoorCommon" />
+                <test l="$element.ifc.qset.name$" op="i!=" r="Qto_DoorBaseQuantities" />
+              </or>
+            </where>
+            <msg id="true" level="error">Error: IFC class IfcDoor on element ($model.name$:$id$) must include Pset_DoorCommon and Qto_DoorBaseQuantities.</msg>
+          </if>
+        </if>
+      </verify>
+
+      <!--
+        ADMM CLASS MODE
+        Rule intent:
+        - If ADMM class metadata exists, ensure ADMM required properties exist.
+        - Update class names and required properties per your ADMM schema.
+      -->
+      <verify>
+        <when>
+          <and>
+            <or>
+              <test l="drawing" op="="><r><list_value key="type" listref="FileType"/></r></test>
+              <test l="model" op="="><r><list_value key="type" listref="FileType"/></r></test>
+              <test l="compmodel" op="="><r><list_value key="type" listref="FileType"/></r></test>
+            </or>
+            <or>
+              <test l="dgn" op="="><r><list_value key="type" listref="FileFormat"/></r></test>
+              <test l="dwg" op="="><r><list_value key="type" listref="FileFormat"/></r></test>
+            </or>
+          </and>
+        </when>
+
+        <select what="elements">
+          <models>
+            <test l="$model.type$" op="=" r="design" />
+          </models>
+          <include_type>All</include_type>
+        </select>
+
+        <!-- Any ADMM class assigned: require ADMM property set presence -->
+        <if>
+          <where>
+            <or>
+              <test l="$element.admm.class$" op="!=" r="" />
+              <test l="$element.admm_class$" op="!=" r="" />
+            </or>
+          </where>
+          <if>
+            <where>
+              <test l="$element.admm.properties.assigned$" op="!=" r="True" />
+            </where>
+            <msg id="true" level="error">Error: Element ($model.name$:$id$) has ADMM Class '$element.admm.class$' but ADMM properties are not applied.</msg>
+          </if>
+        </if>
+
+        <!-- Example class-specific ADMM requirements -->
+        <if>
+          <where>
+            <or>
+              <test l="$element.admm.class$" op="i=" r="FacilityAsset" />
+              <test l="$element.admm_class$" op="i=" r="FacilityAsset" />
+            </or>
+          </where>
+          <if>
+            <where>
+              <or>
+                <test l="$element.admm.propertyset.name$" op="i!=" r="ADMM_FacilityAsset" />
+                <test l="$element.admm.requiredprops.complete$" op="!=" r="True" />
+              </or>
+            </where>
+            <msg id="true" level="error">Error: ADMM class FacilityAsset on element ($model.name$:$id$) must include ADMM_FacilityAsset with all required ADMM properties.</msg>
+          </if>
+        </if>
+
+        <if>
+          <where>
+            <or>
+              <test l="$element.admm.class$" op="i=" r="Equipment" />
+              <test l="$element.admm_class$" op="i=" r="Equipment" />
+            </or>
+          </where>
+          <if>
+            <where>
+              <or>
+                <test l="$element.admm.propertyset.name$" op="i!=" r="ADMM_Equipment" />
+                <test l="$element.admm.requiredprops.complete$" op="!=" r="True" />
+              </or>
+            </where>
+            <msg id="true" level="error">Error: ADMM class Equipment on element ($model.name$:$id$) must include ADMM_Equipment with all required ADMM properties.</msg>
+          </if>
+        </if>
+      </verify>
+
+      <msg id="skip">Checking skipped because file type/format is outside DWG/DGN drawing/model scope.</msg>
+      <msg id="pass">No metadata assignment errors found.</msg>
+    </vb_parameters>
+  </options>
+</rule>
